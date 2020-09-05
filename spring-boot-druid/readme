@@ -1,0 +1,61 @@
+application.properties是配置文件，推荐使用yml格式配置，删除了application.properties文件，新建以下文件：
+application.yml为全局配置，application-dev.yml为开发环境所用配置，application-prod.yml为生成环境所用配置。
+
+配置文件添加三个英文状态下的短横线即可区分，如果两个spring没有分隔则会报错
+#激活哪一个环境的配置文件
+#公共配置
+spring:
+ profiles:
+  active: prd
+ jackson:
+  date-format: yyyy-MM-dd HH:mm:ss
+---
+spring:
+ profiles: dev
+server:
+ port: 8081
+---
+spring:
+ profiles: test
+server:
+ port: 8082
+---
+spring:
+ profiles: prd
+server:
+ port: 8083
+
+
+druid 数据库配置
+第一种方式@Confing注解 配置类  DruidConfiguration
+第二种方式基于注解的配置:
+首先在启动类上加上注解：@ServletComponentScan使Spring能够扫描到我们自己编写的servlet和filter。
+//druid数据源状态监控.
+@WebServlet(urlPatterns = "/druid/*",
+    initParams = {
+        // IP白名单 (没有配置或者为空，则允许所有访问)
+        @WebInitParam(name = "allow", value = "192.168.1.72,127.0.0.1"),
+        // IP黑名单 (存在共同时，deny优先于allow)
+        @WebInitParam(name = "deny", value = "192.168.1.73"),
+        // 用户名
+        @WebInitParam(name = "loginUsername", value = "admin"),
+        // 密码
+        @WebInitParam(name = "loginPassword", value = "admin"),
+        // 禁用HTML页面上的“Reset All”功能
+        @WebInitParam(name = "resetEnable", value = "false")
+    }
+)
+public class DruidStatViewServlet extends StatViewServlet {
+
+}
+
+// druid过滤器.
+@WebFilter(filterName = "druidWebStatFilter", urlPatterns = "/*",
+    initParams = {
+        // 忽略资源
+        @WebInitParam(name = "exclusions", value = "*.js,*.gif,*.jpg,*.bmp,*.png,*.css,*.ico,/druid/*")
+    }
+)
+public class DruidStatFilter extends WebStatFilter {
+}
+

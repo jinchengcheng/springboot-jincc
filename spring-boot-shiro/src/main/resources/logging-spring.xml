@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="60 seconds" debug="false">
+
+    <contextName>logback-demo</contextName>
+
+    <property name="log.path" value="log/DocSearch.log" />
+    <property name="log.pattern" value="%d  %-4relative [%thread] %-5level %logger{35} - %msg%n"/>
+
+    <!--输出到控制台 ConsoleAppender-->
+    <appender name="consoleLog1" class="ch.qos.logback.core.ConsoleAppender">
+        <!--展示格式 layout-->
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <pattern>%d -1 %msg%n</pattern>
+        </layout>
+    </appender>
+
+    <!--输出到控制台 ConsoleAppender-->
+    <appender name="consoleLog2" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d -2 %msg%n</pattern>
+        </encoder>
+    </appender>
+    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+        <file>${log.path}</file>
+        <encoder>
+            <pattern>${log.pattern}</pattern>
+        </encoder>
+        <append>true</append>
+        <!-- encoders are assigned the type
+             ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
+    </appender>
+
+    <appender name="dao" class="ch.qos.logback.core.FileAppender">
+        <file>log/dao.log</file>
+        <encoder>
+            <pattern>${log.pattern}</pattern>
+        </encoder>
+        <append>true</append>
+    </appender>
+    <appender name="service" class="ch.qos.logback.core.FileAppender">
+        <file>log/service.log</file>
+        <encoder>
+            <pattern>${log.pattern}</pattern>
+        </encoder>
+        <append>true</append>
+    </appender>
+    <appender name="controller" class="ch.qos.logback.core.FileAppender">
+        <file>log/controller.log</file>
+        <encoder>
+            <pattern>${log.pattern}</pattern>
+        </encoder>
+        <append>true</append>
+    </appender>
+
+    <!--设置那个包下使用那个配置-->
+    <logger name="com.shiro.controller">
+        <appender-ref ref="controller"/>
+    </logger>
+    <logger name="com.shiro.service">
+        <appender-ref ref="service"/>
+    </logger>
+    <logger name="com.shiro.dao">
+        <appender-ref ref="dao"/>
+    </logger>
+
+
+    <!--指定最基础的日志输出级别-->
+    <!--<root level="INFO">-->
+        <!--appender将会添加到这个loger-->
+        <!--<appender-ref ref="consoleLog1"/>
+        <appender-ref ref="consoleLog2"/>-->
+        <!--<appender-ref ref="FILE"/>
+    </root>-->
+    <root level="INFO">
+        <appender-ref ref="consoleLog1"/>
+        <appender-ref ref="consoleLog2"/>
+    </root>
+
+</configuration>

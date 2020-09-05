@@ -1,0 +1,91 @@
+application.properties是配置文件，推荐使用yml格式配置，删除了application.properties文件，新建以下文件：
+application.yml为全局配置，application-dev.yml为开发环境所用配置，application-prod.yml为生成环境所用配置。
+
+配置文件添加三个英文状态下的短横线即可区分，如果两个spring没有分隔则会报错
+#激活哪一个环境的配置文件
+#公共配置
+spring:
+ profiles:
+  active: prd
+ jackson:
+  date-format: yyyy-MM-dd HH:mm:ss
+---
+spring:
+ profiles: dev
+server:
+ port: 8081
+---
+spring:
+ profiles: test
+server:
+ port: 8082
+---
+spring:
+ profiles: prd
+server:
+ port: 8083
+
+
+druid 数据库配置
+第一种方式@Confing注解 配置类  DruidConfiguration
+第二种方式基于注解的配置:
+首先在启动类上加上注解：@ServletComponentScan使Spring能够扫描到我们自己编写的servlet和filter。
+//druid数据源状态监控.
+@WebServlet(urlPatterns = "/druid/*",
+    initParams = {
+        // IP白名单 (没有配置或者为空，则允许所有访问)
+        @WebInitParam(name = "allow", value = "192.168.1.72,127.0.0.1"),
+        // IP黑名单 (存在共同时，deny优先于allow)
+        @WebInitParam(name = "deny", value = "192.168.1.73"),
+        // 用户名
+        @WebInitParam(name = "loginUsername", value = "admin"),
+        // 密码
+        @WebInitParam(name = "loginPassword", value = "admin"),
+        // 禁用HTML页面上的“Reset All”功能
+        @WebInitParam(name = "resetEnable", value = "false")
+    }
+)
+public class DruidStatViewServlet extends StatViewServlet {
+
+}
+
+// druid过滤器.
+@WebFilter(filterName = "druidWebStatFilter", urlPatterns = "/*",
+    initParams = {
+        // 忽略资源
+        @WebInitParam(name = "exclusions", value = "*.js,*.gif,*.jpg,*.bmp,*.png,*.css,*.ico,/druid/*")
+    }
+)
+public class DruidStatFilter extends WebStatFilter {
+}
+---国际化
+spring boot默认就支持国际化的，而且不需要你过多的做什么配置，只需要在resources/下定义国际化配置文件即可，注意名称必须以messages开发
+messages.properties （默认，当找不到语言的配置的时候，使用该文件进行展示）。
+messages_zh_CN.properties（中文）
+messages_en_US.properties（英文）
+本项目中只是用例，在application.yml指定到Messages.properties中，并且在后台加入获取资源的工具类AbstractLocaleMessageSource，
+使用I18nTestControll里的getI18n方法返回国际化的结果
+
+----------热部署
+pom.xml中加入
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-devtools</artifactId>
+    <optional>true</optional>
+</dependency>
+修改pom
+<plugin>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-maven-plugin</artifactId>
+    <configuration>
+        <fork>true</fork><!--热部署必须-->
+    </configuration>
+</plugin>
+idea中需要更改两个地方
+File->Settings-> Build-Execution-Deployment -> Compiler
+勾选Make Project Automatically，有的版本中叫Build project automatically
+在idea中使用快捷键windows：Shift+Ctrl+A ，mac：command+shift+A，在里面输入registry 双击出现的第一个，然后出现的框中搜索compiler.automake.allow.when.app.running
+并且勾上。重启idea就完成了
+
+
+sprinboot启动类加入@EnableTransactionManagement 开启事务支持，然后在访问数据库的Service方法上添加注解 @Transactional

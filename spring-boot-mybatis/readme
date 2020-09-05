@@ -1,0 +1,94 @@
+application.properties是配置文件，推荐使用yml格式配置，删除了application.properties文件，新建以下文件：
+application.yml为全局配置，application-dev.yml为开发环境所用配置，application-prod.yml为生成环境所用配置。
+
+配置文件添加三个英文状态下的短横线即可区分，如果两个spring没有分隔则会报错
+#激活哪一个环境的配置文件
+#公共配置
+spring:
+ profiles:
+  active: prd
+ jackson:
+  date-format: yyyy-MM-dd HH:mm:ss
+---
+spring:
+ profiles: dev
+server:
+ port: 8081
+---
+spring:
+ profiles: test
+server:
+ port: 8082
+---
+spring:
+ profiles: prd
+server:
+ port: 8083
+
+
+druid 数据库配置
+第一种方式@Confing注解 配置类  DruidConfiguration
+第二种方式基于注解的配置:
+首先在启动类上加上注解：@ServletComponentScan使Spring能够扫描到我们自己编写的servlet和filter。
+//druid数据源状态监控.
+@WebServlet(urlPatterns = "/druid/*",
+    initParams = {
+        // IP白名单 (没有配置或者为空，则允许所有访问)
+        @WebInitParam(name = "allow", value = "192.168.1.72,127.0.0.1"),
+        // IP黑名单 (存在共同时，deny优先于allow)
+        @WebInitParam(name = "deny", value = "192.168.1.73"),
+        // 用户名
+        @WebInitParam(name = "loginUsername", value = "admin"),
+        // 密码
+        @WebInitParam(name = "loginPassword", value = "admin"),
+        // 禁用HTML页面上的“Reset All”功能
+        @WebInitParam(name = "resetEnable", value = "false")
+    }
+)
+public class DruidStatViewServlet extends StatViewServlet {
+
+}
+
+// druid过滤器.
+@WebFilter(filterName = "druidWebStatFilter", urlPatterns = "/*",
+    initParams = {
+        // 忽略资源
+        @WebInitParam(name = "exclusions", value = "*.js,*.gif,*.jpg,*.bmp,*.png,*.css,*.ico,/druid/*")
+    }
+)
+public class DruidStatFilter extends WebStatFilter {
+}
+-------------mybatis-plus配置说明
+建立一个MybatisPlusConfig , 注解为Configuration，同时启用注解属性EnableConfigurationProperties(MybatisProperties.class)
+1.需要使用到数据源 注入属性@Autowired private DataSource dataSource;
+2.注入mybatis属性读取 @Autowired private MybatisProperties properties;
+3.注入资源加载 @Autowired private ResourceLoader resourceLoader;
+4.注入mybatis拦截器@Autowired(required = false) private Interceptor[] interceptors;
+5.注入数据源切换功能@Autowired(required = false) private DatabaseIdProvider databaseIdProvider;
+6.主要的方法是同步mybatis-boot 方法：mybatisSqlSessionFactoryBean
+7.代码生成类 MysqlGenerator，后期根据需要再更改
+8.mybatis-plus 其他属性参见官网 http://mp.baomidou.com/#/quick-start
+9.依赖
+<dependency>
+    <groupId>com.baomidou</groupId>
+    <artifactId>mybatisplus-spring-boot-starter</artifactId>
+    <version>${mybatisplus-spring-boot-starter.version}</version>
+</dependency>
+<dependency>
+    <groupId>com.baomidou</groupId>
+    <artifactId>mybatis-plus</artifactId>
+    <version>${mybatisplus.version}</version>
+</dependency>
+<dependency>
+    <groupId>org.mybatis.spring.boot</groupId>
+    <artifactId>mybatis-spring-boot-starter</artifactId>
+    <version>${mybatis.version}</version>
+</dependency>
+生成模板需要的包
+<dependency>
+    <groupId>org.apache.velocity</groupId>
+    <artifactId>velocity-engine-core</artifactId>
+    <version>2.0</version>
+</dependency>
+
+

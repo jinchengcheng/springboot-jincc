@@ -1,0 +1,15 @@
+1、该类中的@Component 什么实例化bena等等，主要启动实例化的类，需要在别的模块中启动方法里使用@ComponentScan("包路径")；
+2、其他模块中需要使用该文件初始化的资源类(读取配置文件中的数据并实例化的类)，需要在别的模块中启动方法里使用@EnableConfigurationProperties(类.class);
+   例如：
+   类：
+    @Component
+    @PropertySource("classpath:/config/xxx.properties")
+    @ConfigurationProperties(prefix="aa.bb")
+    class 类名 {private String name; get和set方法}
+   资源文件
+   xxx.properties
+        aa.bb.name=xxx
+   其他模块中的启动方法：
+   @EnableConfigurationProperties("类名.class")
+   xxxApplication{  }
+3、
